@@ -1,26 +1,29 @@
 package com.udacity.gradle.builditbigger;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.runningoutofbreadth.backend.myApi.MyApi;
+import com.runningoutofbreadth.jokedisplayer.JokeActivity;
 
 import java.io.IOException;
 
 /**
  * Created by SandD on 2/8/2016.
  */
-class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
+class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, Pair<Context, String>> {
     private static MyApi myApiService = null;
     private Context context;
 
+    public EndpointsAsyncTask() {
+    }
+
     @Override
-    protected String doInBackground(Pair<Context, String>... params) {
+    protected Pair<Context, String> doInBackground(Pair<Context, String>... params) {
         if(myApiService == null) {  // Only do this once
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null)
@@ -43,15 +46,18 @@ class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> 
         String name = params[0].second;
 
         try {
-            return myApiService.sayHi(name).execute().getData();
+            return new Pair<Context, String>(context, myApiService.sayHi(name).execute().getData());
         } catch (IOException e) {
-            return e.getMessage();
+            return new Pair <Context, String>(null, e.getMessage());
         }
     }
 
     @Override
-    protected void onPostExecute(String result) {
-        Toast.makeText(context, result, Toast.LENGTH_LONG).show();
-        Log.v("TOASTMESSAGE", result);
+    protected void onPostExecute(Pair<Context, String> result) {
+//        Toast.makeText(context, result, Toast.LENGTH_LONG).show();
+        Intent mIntent = new Intent(result.first, JokeActivity.class);
+        mIntent.putExtra(MainActivity.JOKE_KEY, result.second);
+        result.first.startActivity(mIntent);
     }
+
 }
