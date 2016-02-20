@@ -1,17 +1,19 @@
 package com.udacity.gradle.builditbigger;
 
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.runningoutofbreadth.jokedisplayer.JokeActivity;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends ActionBarActivity implements EndpointsAsyncResponse{
 
     static final String JOKE_KEY = "JOKE";
+    static final String LOG_TAG = "MAIN ACTIVITY LOGGER: ";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +45,16 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void tellJoke(View view) {
-        Pair<Context, String> testPair = new Pair<Context, String>(this, "Manfred");
         EndpointsAsyncTask endpointsAsyncTask = new EndpointsAsyncTask();
-        endpointsAsyncTask.execute(testPair);
-
-//        Toast.makeText(this, joke, Toast.LENGTH_SHORT).show();
+        endpointsAsyncTask.response = this;
+        endpointsAsyncTask.execute();
     }
 
+    @Override
+    public void sendResult(String result) {
+        //TODO: make this not so laggy. UI thread is held up because it's waiting for AsyncTask to complete.
+        Intent mIntent = new Intent(this, JokeActivity.class);
+        mIntent.putExtra(MainActivity.JOKE_KEY, result);
+        startActivity(mIntent);
+    }
 }

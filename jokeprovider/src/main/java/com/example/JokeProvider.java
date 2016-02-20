@@ -27,9 +27,8 @@ public class JokeProvider {
         };
 
         Random random = new Random();
-        int randInt = random.nextInt();
-        int chooserInt = randInt % jokes.length;
+        int randInt = random.nextInt(jokes.length);
 
-        return jokes[chooserInt];
+        return jokes[randInt];
     }
 }
